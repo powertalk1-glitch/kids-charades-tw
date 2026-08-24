@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff8e8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="比手畫腳">
+  <meta name="description" content="6–12 歲兒童也能輕鬆玩的離線比手畫腳遊戲">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="stylesheet" href="styles.css">
+  <title>比手畫腳</title>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要內容</a>
+<header class="topbar">
+  <a class="brand" href="#home" data-nav="home" aria-label="回到首頁"><span aria-hidden="true">🎭</span> 比手畫腳</a>
+  <div class="toggles" aria-label="遊戲偏好">
+    <button id="sound-toggle" class="icon-button" type="button" aria-pressed="true"><span aria-hidden="true">🔊</span><span>音效</span></button>
+    <button id="speech-toggle" class="icon-button" type="button" aria-pressed="true"><span aria-hidden="true">🗣️</span><span>朗讀</span></button>
+  </div>
+</header>
+<main id="main" tabindex="-1">
+  <section id="home" class="screen active hero" aria-labelledby="home-title">
+    <div class="hero-emoji" aria-hidden="true">🐘 🍕 🚀</div>
+    <p class="eyebrow">全家一起動起來</p>
+    <h1 id="home-title">比手畫腳</h1>
+    <p class="lead">看圖片、演動作，讓大家猜答案！</p>
+    <button class="primary jumbo" type="button" data-nav="setup">開始遊戲</button>
+    <button class="secondary jumbo" type="button" data-nav="rules">怎麼玩？</button>
+  </section>
+
+  <section id="rules" class="screen" aria-labelledby="rules-title">
+    <p class="eyebrow">三步就會玩</p><h2 id="rules-title">玩法</h2>
+    <ol class="rules-list">
+      <li><span aria-hidden="true">🙈</span><div><strong>不能說答案</strong><p>出題者看字卡，用動作表演。</p></div></li>
+      <li><span aria-hidden="true">🤸</span><div><strong>動動身體</strong><p>不能發出答案裡的字，也不做危險動作。</p></div></li>
+      <li><span aria-hidden="true">🎉</span><div><strong>猜中就得分</strong><p>按「答對」換下一題，不會就跳過。</p></div></li>
+    </ol>
+    <button class="primary jumbo" type="button" data-nav="setup">我會了，開始！</button>
+    <button class="text-button" type="button" data-nav="home">回首頁</button>
+  </section>
+
+  <section id="setup" class="screen wide" aria-labelledby="setup-title">
+    <p class="eyebrow">準備這一輪</p><h2 id="setup-title">選類別與時間</h2>
+    <fieldset><legend>要演什麼？</legend><div id="categories" class="choice-grid"></div></fieldset>
+    <fieldset><legend>玩多久？</legend><div class="time-grid">
+      <label><input type="radio" name="duration" value="30"><span>30 秒</span></label>
+      <label><input type="radio" name="duration" value="60" checked><span>60 秒</span></label>
+      <label><input type="radio" name="duration" value="90"><span>90 秒</span></label>
+      <label><input type="radio" name="duration" value="0"><span>∞ 無限</span></label>
+    </div></fieldset>
+    <button id="setup-next" class="primary jumbo" type="button">下一步</button>
+    <button class="text-button" type="button" data-nav="home">回首頁</button>
+  </section>
+
+  <section id="handoff" class="screen handoff" aria-labelledby="handoff-title">
+    <div class="hero-emoji" aria-hidden="true">🤫📱</div><p class="eyebrow">答案要保密</p>
+    <h2 id="handoff-title">交給出題者</h2><p class="lead">其他人先轉過身，不要偷看螢幕喔！</p>
+    <p id="round-summary" class="pill"></p>
+    <button id="ready-button" class="primary jumbo" type="button">我準備好了</button>
+    <button class="text-button" type="button" data-nav="setup">重新選擇</button>
+  </section>
+
+  <section id="countdown" class="screen countdown" aria-live="assertive" aria-label="倒數計時">
+    <p>準備表演</p><div id="countdown-number">3</div>
+  </section>
+
+  <section id="game" class="screen game-screen" aria-labelledby="answer">
+    <div class="game-status"><span id="category-badge">動物</span><span id="timer" role="timer" aria-label="剩餘時間">1:00</span><span id="score" aria-live="polite">答對 0</span></div>
+    <article id="card" class="prompt-card" aria-live="polite">
+      <div id="card-emoji" class="card-emoji" aria-hidden="true">🐘</div>
+      <h2 id="answer">大象</h2><p id="hint">用手當長鼻子</p>
+    </article>
+    <div class="game-actions">
+      <button id="correct-button" class="correct" type="button"><span aria-hidden="true">✓</span>答對</button>
+      <button id="skip-button" class="skip" type="button"><span aria-hidden="true">↷</span>跳過</button>
+      <button id="end-button" class="end" type="button"><span aria-hidden="true">■</span>結束</button>
+    </div>
+  </section>
+
+  <section id="results" class="screen wide" aria-labelledby="results-title">
+    <div id="result-emoji" class="hero-emoji" aria-hidden="true">🌟</div><p class="eyebrow">這一輪完成了</p>
+    <h2 id="results-title">表現太棒了！</h2><p id="result-message" class="lead"></p>
+    <div class="result-counts"><div><strong id="correct-total">0</strong><span>答對</span></div><div><strong id="skipped-total">0</strong><span>跳過</span></div></div>
+    <div id="history" class="history"></div>
+    <div class="result-actions"><button id="replay-button" class="primary jumbo" type="button">再玩一次</button><button class="secondary jumbo" type="button" data-nav="setup">換類別或時間</button><button class="text-button" type="button" data-nav="home">回首頁</button></div>
+  </section>
+</main>
+
+<div id="end-dialog" class="dialog-backdrop" hidden>
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+    <h2 id="dialog-title">要結束這一輪嗎？</h2><p id="dialog-description">目前的答對與跳過紀錄都會保留。</p>
+    <div><button id="confirm-end" class="end" type="button">結束並看結果</button><button id="cancel-end" class="secondary" type="button">繼續遊戲</button></div>
+  </div>
+</div>
+<noscript><p class="noscript">請開啟 JavaScript 才能開始遊戲。</p></noscript>
+<script src="cards.js"></script><script src="app.js"></script>
+</body></html>
