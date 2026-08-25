@@ -89,7 +89,10 @@ def main() -> int:
     check("min-height: 64px" in css, "觸控元件至少 64px", errors)
     check("prefers-reduced-motion" in css, "支援減少動態效果偏好", errors)
     check("performance.now()" in app and "deadline" in app, "計時採用 performance.now 絕對截止時間", errors)
-    check("speechSynthesis" in app and "zh-TW" in app, "朗讀功能偵測並優先使用 zh-TW", errors)
+    check("speechSynthesis" not in app and "speech-toggle" not in html, "已完整移除朗讀功能", errors)
+    check('value="0" checked' in html and 'value="60" checked' not in html, "預設時間為無限", errors)
+    check("不分類別（綜合）" in app and "ALL_CATEGORIES" in app, "提供不分類別（綜合）選項", errors)
+    check("state.category===ALL_CATEGORIES?window.CARDS" in app, "綜合模式會使用全部字卡", errors)
     check("AudioContext" in app and "pointerdown" in app, "Web Audio 由使用者操作啟用", errors)
     check("localStorage" in app and "try" in app and "catch" in app, "localStorage 具例外保護", errors)
     for asset in ["index.html", "styles.css", "cards.js", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"]:

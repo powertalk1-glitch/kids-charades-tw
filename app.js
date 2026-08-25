@@ -3,25 +3,20 @@
   const $ = id => document.getElementById(id);
   const screens = [...document.querySelectorAll('.screen')];
   const categories = [...new Set(window.CARDS.map(card => card.category))];
-  const categoryEmoji = {'動物':'🐘','食物':'🍕','交通':'🚀','運動':'⚽','職業':'👩‍🚒','日常動作':'👏','生活物品':'🎒','自然幻想':'🌈'};
+  const ALL_CATEGORIES = '綜合';
+  const categoryEmoji = {'綜合':'🎲','動物':'🐘','食物':'🍕','交通':'🚀','運動':'⚽','職業':'👩‍🚒','日常動作':'👏','生活物品':'🎒','自然幻想':'🌈'};
   const categoryLabel = {'交通':'交通工具','自然幻想':'自然與幻想'};
   const categoryName = category => categoryLabel[category] || category;
-  const state = {screen:'home', category:categories[0], duration:60, queue:[], current:null, correct:[], skipped:[], deadline:0, timerId:null, transitionIds:new Set(), locked:false, audio:null, sound:true, speech:true, lastFocus:null, finished:false};
+  const state = {screen:'home', category:ALL_CATEGORIES, duration:0, queue:[], current:null, correct:[], skipped:[], deadline:0, timerId:null, transitionIds:new Set(), locked:false, audio:null, sound:true, lastFocus:null, finished:false};
 
   function loadPreferences(){
-    try { state.sound = localStorage.getItem('charades-sound') !== 'false'; state.speech = localStorage.getItem('charades-speech') !== 'false'; } catch (_) { state.sound=true; state.speech=true; }
+    try { state.sound = localStorage.getItem('charades-sound') !== 'false'; } catch (_) { state.sound=true; }
     updateToggles();
   }
   function savePreference(key,value){ try { localStorage.setItem(key,String(value)); } catch (_) {} }
   function updateToggles(){
-    const speechAvailable='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
-    if(!speechAvailable) state.speech=false;
     $('sound-toggle').setAttribute('aria-pressed',String(state.sound));
     $('sound-toggle').querySelector('span').textContent=state.sound?'🔊':'🔇';
-    $('speech-toggle').disabled=!speechAvailable;
-    $('speech-toggle').setAttribute('aria-pressed',String(state.speech));
-    $('speech-toggle').querySelector('span').textContent=state.speech?'🗣️':'🔕';
-    $('speech-toggle').querySelectorAll('span')[1].textContent=speechAvailable?'朗讀':'朗讀不支援';
   }
   function initAudio(){
     if (!state.sound || state.audio) return;
@@ -41,15 +36,11 @@
       osc.connect(gain).connect(state.audio.destination); osc.start(now); osc.stop(now+.2);
     } catch (_) {}
   }
-  function stopSpeech(){ if('speechSynthesis' in window){ try{window.speechSynthesis.cancel();}catch(_){} } }
-  function speak(text){
-    stopSpeech(); if(!state.speech||!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)) return;
-    try{ const u=new SpeechSynthesisUtterance(text); u.lang='zh-TW'; u.rate=.85; const voices=window.speechSynthesis.getVoices(); u.voice=voices.find(v=>v.lang==='zh-TW'||v.lang.startsWith('zh-TW'))||voices.find(v=>v.lang.startsWith('zh'))||null; window.speechSynthesis.speak(u); }catch(_){}
-  }
+
   function later(fn,ms){ const id=setTimeout(()=>{state.transitionIds.delete(id);fn();},ms);state.transitionIds.add(id);return id; }
   function clearRuntime(){
     if(state.timerId!==null){clearInterval(state.timerId);state.timerId=null;}
-    state.deadline=0;state.transitionIds.forEach(clearTimeout);state.transitionIds.clear();stopSpeech();state.locked=false;
+    state.deadline=0;state.transitionIds.forEach(clearTimeout);state.transitionIds.clear();state.locked=false;
     $('end-dialog').hidden=true;
   }
   function showScreen(id,focus=true){
@@ -63,7 +54,8 @@
     const a=[...items]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
   }
   function buildCategories(){
-    $('categories').innerHTML=categories.map((cat,i)=>`<label><input type="radio" name="category" value="${cat}" ${i===0?'checked':''}><span><b aria-hidden="true">${categoryEmoji[cat]}</b>${categoryName(cat)}</span></label>`).join('');
+    const choices=[ALL_CATEGORIES,...categories];
+    $('categories').innerHTML=choices.map((cat,i)=>`<label><input type="radio" name="category" value="${cat}" ${i===0?'checked':''}><span><b aria-hidden="true">${categoryEmoji[cat]}</b>${cat===ALL_CATEGORIES?'不分類別（綜合）':categoryName(cat)}</span></label>`).join('');
   }
   function beginHandoff(){
     state.category=document.querySelector('input[name=category]:checked').value;
@@ -72,7 +64,7 @@
     showScreen('handoff');
   }
   function prepareRound(){
-    initAudio(); clearRuntime(); state.queue=shuffle(window.CARDS.filter(c=>c.category===state.category)); state.correct=[];state.skipped=[];state.current=null;state.finished=false;
+    initAudio(); clearRuntime(); state.queue=shuffle(state.category===ALL_CATEGORIES?window.CARDS:window.CARDS.filter(c=>c.category===state.category)); state.correct=[];state.skipped=[];state.current=null;state.finished=false;
     showScreen('countdown',false); let n=3; $('countdown-number').textContent=n;
     const step=()=>{tone('skip');n-=1;if(n>0){$('countdown-number').textContent=n;later(step,700);}else{ $('countdown-number').textContent='開始！'; later(startRound,500); }}; later(step,700);
   }
@@ -90,7 +82,7 @@
   function updateScore(){ $('score').textContent=`答對 ${state.correct.length}`; }
   function renderCard(){
     const c=state.current; $('category-badge').textContent=`${categoryEmoji[c.category]} ${categoryName(c.category)}`;$('card-emoji').textContent=c.emoji;$('answer').textContent=c.answer;$('hint').textContent=c.hint;
-    $('card').classList.remove('changing'); state.locked=false; speak(c.answer);
+    $('card').classList.remove('changing'); state.locked=false;
   }
   function nextCard(immediate=false){
     if(state.finished)return;
@@ -100,7 +92,7 @@
   }
   function record(result){
     if(state.locked||state.finished||state.screen!=='game')return;
-    state.locked=true; stopSpeech();
+    state.locked=true;
     if(result==='correct'){state.correct.push(state.current);tone('correct');}else{state.skipped.push(state.current);tone('skip');}
     updateScore(); nextCard();
   }
@@ -134,7 +126,7 @@
   $('confirm-end').addEventListener('click',()=>finishRound('你選擇提早結束。'));
   $('replay-button').addEventListener('click',()=>{showScreen('handoff');$('round-summary').textContent=`${categoryEmoji[state.category]} ${categoryName(state.category)}・${state.duration?state.duration+' 秒':'無限時間'}`;});
   $('sound-toggle').addEventListener('click',()=>{state.sound=!state.sound;savePreference('charades-sound',state.sound);updateToggles();if(state.sound){initAudio();tone('correct');}});
-  $('speech-toggle').addEventListener('click',()=>{state.speech=!state.speech;savePreference('charades-speech',state.speech);updateToggles();if(!state.speech)stopSpeech();else if(state.screen==='game'&&state.current)speak(state.current.answer);});
+
   document.addEventListener('keydown',dialogKeys);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.screen==='game')updateTimer();});
   window.addEventListener('pagehide',clearRuntime);
