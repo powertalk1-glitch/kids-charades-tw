@@ -4,10 +4,14 @@
   const screens = [...document.querySelectorAll('.screen')];
   const categories = [...new Set(window.CARDS.map(card => card.category))];
   const ALL_CATEGORIES = '綜合';
-  const categoryEmoji = {'綜合':'🎲','動物':'🐘','食物':'🍕','交通':'🚀','運動':'⚽','職業':'👩‍🚒','日常動作':'👏','生活物品':'🎒','自然幻想':'🌈'};
+  const categoryEmoji = {'綜合':'🎲','綜合擴充題':'✨','動物':'🐘','食物':'🍕','交通':'🚀','運動':'⚽','職業':'👩‍🚒','日常動作':'👏','生活物品':'🎒','自然幻想':'🌈'};
   const categoryLabel = {'交通':'交通工具','自然幻想':'自然與幻想'};
   const categoryName = category => categoryLabel[category] || category;
-  const state = {screen:'home', category:ALL_CATEGORIES, duration:0, queue:[], current:null, correct:[], skipped:[], deadline:0, timerId:null, transitionIds:new Set(), locked:false, audio:null, sound:true, lastFocus:null, finished:false};
+  const openMojiPath = emoji => {
+    const codepoints=[...emoji].map(character=>character.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')).filter(codepoint=>codepoint!=='FE0F');
+    return `assets/openmoji/${codepoints.join('-')}.png`;
+  };
+  const state = {screen:'home', category:ALL_CATEGORIES, duration:0, queue:[], current:null, correct:[], skipped:[], deadline:0, timerId:null, transitionIds:new Set(), locked:false, audio:null, sound:true, lastFocus:null, finished:false, imageRequest:0};
 
   function loadPreferences(){
     try { state.sound = localStorage.getItem('charades-sound') !== 'false'; } catch (_) { state.sound=true; }
@@ -40,7 +44,7 @@
   function later(fn,ms){ const id=setTimeout(()=>{state.transitionIds.delete(id);fn();},ms);state.transitionIds.add(id);return id; }
   function clearRuntime(){
     if(state.timerId!==null){clearInterval(state.timerId);state.timerId=null;}
-    state.deadline=0;state.transitionIds.forEach(clearTimeout);state.transitionIds.clear();state.locked=false;
+    state.deadline=0;state.transitionIds.forEach(clearTimeout);state.transitionIds.clear();state.locked=false;state.imageRequest+=1;
     $('end-dialog').hidden=true;
   }
   function showScreen(id,focus=true){
@@ -81,7 +85,15 @@
   }
   function updateScore(){ $('score').textContent=`答對 ${state.correct.length}`; }
   function renderCard(){
-    const c=state.current; $('category-badge').textContent=`${categoryEmoji[c.category]} ${categoryName(c.category)}`;$('card-emoji').textContent=c.emoji;$('answer').textContent=c.answer;$('hint').textContent=c.hint;
+    const c=state.current;
+    const image=$('card-image'), emoji=$('card-emoji');
+    const requestToken=++state.imageRequest;
+    $('category-badge').textContent=`${categoryEmoji[c.category]} ${categoryName(c.category)}`;
+    emoji.textContent=c.emoji; emoji.hidden=false; image.hidden=true;
+    image.onload=()=>{if(requestToken!==state.imageRequest)return;image.hidden=false;emoji.hidden=true;};
+    image.onerror=()=>{if(requestToken!==state.imageRequest)return;image.hidden=true;emoji.hidden=false;};
+    image.src=openMojiPath(c.emoji);
+    $('answer').textContent=c.answer;$('hint').textContent=c.hint;
     $('card').classList.remove('changing'); state.locked=false;
   }
   function nextCard(immediate=false){

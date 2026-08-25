@@ -30,6 +30,7 @@
     <p class="lead">看圖片、演動作，讓大家猜答案！</p>
     <button class="primary jumbo" type="button" data-nav="setup">開始遊戲</button>
     <button class="secondary jumbo" type="button" data-nav="rules">怎麼玩？</button>
+    <a class="credits-link" href="credits.html">圖片素材與授權</a>
   </section>
 
   <section id="rules" class="screen" aria-labelledby="rules-title">
@@ -71,7 +72,10 @@
   <section id="game" class="screen game-screen" aria-labelledby="answer">
     <div class="game-status"><span id="category-badge">動物</span><span id="timer" role="timer" aria-label="剩餘時間">1:00</span><span id="score" aria-live="polite">答對 0</span></div>
     <article id="card" class="prompt-card" aria-live="polite">
-      <div id="card-emoji" class="card-emoji" aria-hidden="true">🐘</div>
+      <div class="card-visual" aria-hidden="true">
+        <img id="card-image" class="card-image" alt="" hidden>
+        <div id="card-emoji" class="card-emoji">🐘</div>
+      </div>
       <h2 id="answer">大象</h2><p id="hint">用手當長鼻子</p>
     </article>
     <div class="game-actions">

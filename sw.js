@@ -1,18 +1,30 @@
-const CACHE_VERSION = "charades-pwa-2026-08-25-v4";
+const CACHE_VERSION = "charades-pwa-2026-08-25-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./cards.js",
   "./app.js",
+  "./credits.html",
+  "./CREDITS.md",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png"
 ];
 
+async function cacheAppShellAndCards() {
+  const cache = await caches.open(CACHE_VERSION);
+  await cache.addAll(APP_SHELL);
+  const response = await fetch("./assets/openmoji/manifest.json");
+  if (!response.ok) throw new Error("OpenMoji manifest unavailable");
+  await cache.put("./assets/openmoji/manifest.json", response.clone());
+  const openmojiAssets = await response.json();
+  await cache.addAll(openmojiAssets.map((asset) => `./${asset}`));
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(cacheAppShellAndCards().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
