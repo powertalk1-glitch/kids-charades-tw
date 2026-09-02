@@ -1,0 +1,26 @@
+# 系統 / 編輯器暫存
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# 日誌
+*.log
+npm-debug.log*
+
+# 建置產物（若有）
+node_modules/
+dist/
+build/
+
+# 環境與密鑰
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
