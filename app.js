@@ -11,16 +11,19 @@
     const codepoints=[...emoji].map(character=>character.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')).filter(codepoint=>codepoint!=='FE0F');
     return `assets/openmoji/${codepoints.join('-')}.png`;
   };
-  const state = {screen:'home', category:ALL_CATEGORIES, duration:0, queue:[], current:null, correct:[], skipped:[], deadline:0, timerId:null, transitionIds:new Set(), locked:false, audio:null, sound:true, lastFocus:null, finished:false, imageRequest:0};
+  const state = {screen:'home', category:ALL_CATEGORIES, duration:0, queue:[], current:null, correct:[], skipped:[], deadline:0, timerId:null, transitionIds:new Set(), locked:false, audio:null, sound:true, zhuyin:true, lastFocus:null, finished:false, imageRequest:0};
 
   function loadPreferences(){
     try { state.sound = localStorage.getItem('charades-sound') !== 'false'; } catch (_) { state.sound=true; }
+    try { state.zhuyin = localStorage.getItem('charades-zhuyin') !== 'false'; } catch (_) { state.zhuyin=true; }
     updateToggles();
   }
   function savePreference(key,value){ try { localStorage.setItem(key,String(value)); } catch (_) {} }
   function updateToggles(){
     $('sound-toggle').setAttribute('aria-pressed',String(state.sound));
     $('sound-toggle').querySelector('span').textContent=state.sound?'🔊':'🔇';
+    $('zhuyin-toggle').setAttribute('aria-pressed',String(state.zhuyin));
+    $('zhuyin').hidden=!state.zhuyin;
   }
   function initAudio(){
     if (!state.sound || state.audio) return;
@@ -93,7 +96,7 @@
     image.onload=()=>{if(requestToken!==state.imageRequest)return;image.hidden=false;emoji.hidden=true;};
     image.onerror=()=>{if(requestToken!==state.imageRequest)return;image.hidden=true;emoji.hidden=false;};
     image.src=openMojiPath(c.emoji);
-    $('answer').textContent=c.answer;$('hint').textContent=c.hint;
+    $('answer').textContent=c.answer;$('zhuyin').textContent=c.zhuyin;$('zhuyin').hidden=!state.zhuyin;$('hint').textContent=c.hint;
     $('card').classList.remove('changing'); state.locked=false;
   }
   function nextCard(immediate=false){
@@ -138,6 +141,7 @@
   $('confirm-end').addEventListener('click',()=>finishRound('你選擇提早結束。'));
   $('replay-button').addEventListener('click',()=>{showScreen('handoff');$('round-summary').textContent=`${categoryEmoji[state.category]} ${categoryName(state.category)}・${state.duration?state.duration+' 秒':'無限時間'}`;});
   $('sound-toggle').addEventListener('click',()=>{state.sound=!state.sound;savePreference('charades-sound',state.sound);updateToggles();if(state.sound){initAudio();tone('correct');}});
+  $('zhuyin-toggle').addEventListener('click',()=>{state.zhuyin=!state.zhuyin;savePreference('charades-zhuyin',state.zhuyin);updateToggles();});
 
   document.addEventListener('keydown',dialogKeys);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.screen==='game')updateTimer();});

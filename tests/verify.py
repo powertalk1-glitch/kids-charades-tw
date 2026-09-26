@@ -68,7 +68,8 @@ def main() -> int:
         r'"?category"?\s*:\s*"(?P<category>[^"]+)"\s*,\s*'
         r'"?answer"?\s*:\s*"(?P<answer>[^"]+)"\s*,\s*'
         r'"?emoji"?\s*:\s*"(?P<emoji>[^"]+)"\s*,\s*'
-        r'"?hint"?\s*:\s*"(?P<hint>[^"]+)"\s*\}'
+        r'"?hint"?\s*:\s*"(?P<hint>[^"]+)"'
+        r'(?:\s*,\s*"?zhuyin"?\s*:\s*"(?P<zhuyin>[^"]+)")?\s*\}'
     )
     cards = [match.groupdict() for match in card_pattern.finditer(cards_source)]
     ids = [card["id"] for card in cards]
@@ -87,6 +88,7 @@ def main() -> int:
     check(len(answers) == len(set(answers)), "全部 328 張字卡答案皆不重複", errors)
     check(len(categories) == 9, f"恰好 9 個字卡類別（目前 {len(categories)} 個）", errors)
     check(all(card["hint"].strip() and card["emoji"].strip() for card in cards), "每張字卡都有圖片與提示", errors)
+    check(all((card["zhuyin"] or "").strip() for card in cards), "每張字卡都有注音", errors)
     expansion_by_answer = {card["answer"]: card for card in expansion_cards}
     reviewed_image_choices = {
         "盪鞦韆": "↔️",
@@ -136,6 +138,7 @@ def main() -> int:
     check("viewport-fit=cover" in html, "設定 viewport-fit=cover", errors)
     check("apple-touch-icon" in html and "apple-mobile-web-app-capable" in html, "包含 Apple PWA 設定", errors)
     check('id="card-image"' in html, "字卡包含圖片顯示元件", errors)
+    check('id="zhuyin-toggle"' in html and 'id="zhuyin"' in html, "介面包含注音開關與字卡注音", errors)
     check('href="credits.html"' in html, "遊戲介面提供圖片素材授權入口", errors)
     check("safe-area-inset" in css, "CSS 支援裝置安全區", errors)
     check("min-height: 64px" in css, "觸控元件至少 64px", errors)
@@ -149,6 +152,7 @@ def main() -> int:
     check("imageRequest" in app and "requestToken" in app, "圖片 callback 只處理目前字卡請求", errors)
     check("AudioContext" in app and "pointerdown" in app, "Web Audio 由使用者操作啟用", errors)
     check("localStorage" in app and "try" in app and "catch" in app, "localStorage 具例外保護", errors)
+    check("charades-zhuyin" in app and "state.zhuyin" in app, "注音顯示偏好會保存", errors)
     for asset in ["index.html", "styles.css", "cards.js", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"]:
         check(asset in sw, f"離線快取包含 {asset}", errors)
     check("skipWaiting" in sw and "clients.claim" in sw and "CACHE_VERSION" in sw, "Service Worker 支援版本更新", errors)

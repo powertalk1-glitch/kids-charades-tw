@@ -70,13 +70,13 @@
   </section>
 
   <section id="game" class="screen game-screen" aria-labelledby="answer">
-    <div class="game-status"><span id="category-badge">動物</span><span id="timer" role="timer" aria-label="剩餘時間">1:00</span><span id="score" aria-live="polite">答對 0</span></div>
+    <div class="game-status"><span id="category-badge">動物</span><span id="timer" role="timer" aria-label="剩餘時間">1:00</span><button id="zhuyin-toggle" class="status-toggle" type="button" aria-pressed="true"><span aria-hidden="true">ㄅ</span><span>注音</span></button><span id="score" aria-live="polite">答對 0</span></div>
     <article id="card" class="prompt-card" aria-live="polite">
       <div class="card-visual" aria-hidden="true">
         <img id="card-image" class="card-image" alt="" hidden>
         <div id="card-emoji" class="card-emoji">🐘</div>
       </div>
-      <h2 id="answer">大象</h2><p id="hint">用手當長鼻子</p>
+      <h2 id="answer">大象</h2><p id="zhuyin" class="zhuyin">ㄉㄚˋ ㄒㄧㄤˋ</p><p id="hint">用手當長鼻子</p>
     </article>
     <div class="game-actions">
       <button id="correct-button" class="correct" type="button"><span aria-hidden="true">✓</span>答對</button>

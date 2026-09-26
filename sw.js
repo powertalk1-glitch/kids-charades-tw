@@ -1,4 +1,4 @@
-const CACHE_VERSION = "charades-pwa-2026-08-25-v7";
+const CACHE_VERSION = "charades-pwa-2026-09-26-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
